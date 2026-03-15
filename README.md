@@ -25,7 +25,7 @@ Interactive demo tool for pipe insulation scanning, AI component detection, insu
 
 ## Live Demo
 
-[Open Demo](https://rickv78.github.io/Thermatras/)
+[Open Demo](https://rickvkesteren.github.io/Thermatras/)
 
 ## Screenshot
 
