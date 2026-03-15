@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermatras - Installatie Scanner &amp; Isolatie Uitslag</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <h1>THERMATRAS</h1>
+                <span class="tagline">Installatie Scanner &amp; Isolatie Uitslag Tool</span>
+            </div>
+            <div class="workflow-progress" id="workflow-progress">
+                <div class="wf-step completed" data-step="installatie"><span class="wf-num">1</span><span class="wf-label">Installatie</span></div>
+                <div class="wf-connector"></div>
+                <div class="wf-step" data-step="scanner"><span class="wf-num">2</span><span class="wf-label">Scan</span></div>
+                <div class="wf-connector"></div>
+                <div class="wf-step" data-step="configurator"><span class="wf-num">3</span><span class="wf-label">Isolatie</span></div>
+                <div class="wf-connector"></div>
+                <div class="wf-step" data-step="uitslag"><span class="wf-num">4</span><span class="wf-label">Uitslag</span></div>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-tab="installatie">
+                    <span class="icon">🏗️</span> Installatie
+                </button>
+                <button class="nav-btn" data-tab="scanner">
+                    <span class="icon">📡</span> Scanner
+                </button>
+                <button class="nav-btn" data-tab="configurator">
+                    <span class="icon">🔧</span> Isolatie
+                </button>
+                <button class="nav-btn" data-tab="uitslag">
+                    <span class="icon">📐</span> Uitslag
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- TAB 0: Installatie Builder -->
+        <section id="tab-installatie" class="tab-content active">
+            <div class="panel-layout three-column">
+                <!-- Left: Component Library -->
+                <div class="side-panel component-library">
+                    <h2>Componenten</h2>
+                    <p class="description">Klik om toe te voegen aan de installatie.</p>
+
+                    <div class="component-grid">
+                        <button class="comp-btn" data-type="straight" title="Rechte buis">
+                            <svg viewBox="0 0 60 60"><rect x="22" y="5" width="16" height="50" rx="3" fill="#708090" stroke="#fff" stroke-width="1"/></svg>
+                            <span>Rechte buis</span>
+                        </button>
+                        <button class="comp-btn" data-type="elbow" title="Bocht">
+                            <svg viewBox="0 0 60 60"><path d="M22 55 L22 30 Q22 15 37 15 L55 15" fill="none" stroke="#708090" stroke-width="12" stroke-linecap="round"/></svg>
+                            <span>Bocht</span>
+                        </button>
+                        <button class="comp-btn" data-type="t-piece" title="T-stuk">
+                            <svg viewBox="0 0 60 60"><rect x="22" y="5" width="16" height="50" rx="2" fill="#708090" stroke="#fff" stroke-width="1"/><rect x="30" y="22" width="25" height="16" rx="2" fill="#708090" stroke="#fff" stroke-width="1"/></svg>
+                            <span>T-stuk</span>
+                        </button>
+                        <button class="comp-btn" data-type="reducer" title="Verloopstuk">
+                            <svg viewBox="0 0 60 60"><path d="M18 55 L18 20 L26 5 L34 5 L42 20 L42 55 Z" fill="#708090" stroke="#fff" stroke-width="1"/></svg>
+                            <span>Verloopstuk</span>
+                        </button>
+                        <button class="comp-btn" data-type="flange" title="Flens">
+                            <svg viewBox="0 0 60 60"><rect x="10" y="22" width="40" height="16" rx="3" fill="#a0a0b0" stroke="#fff" stroke-width="1"/><circle cx="15" cy="30" r="3" fill="#404040"/><circle cx="45" cy="30" r="3" fill="#404040"/></svg>
+                            <span>Flens</span>
+                        </button>
+                        <button class="comp-btn" data-type="valve" title="Afsluiter">
+                            <svg viewBox="0 0 60 60"><rect x="20" y="20" width="20" height="20" rx="2" fill="#556070" stroke="#fff" stroke-width="1"/><line x1="30" y1="20" x2="30" y2="8" stroke="#333" stroke-width="3"/><circle cx="30" cy="7" r="5" fill="none" stroke="#cc3333" stroke-width="2"/></svg>
+                            <span>Afsluiter</span>
+                        </button>
+                        <button class="comp-btn" data-type="expansion-joint" title="Compensator">
+                            <svg viewBox="0 0 60 60"><path d="M22 5 L22 12 L18 16 L22 20 L18 24 L22 28 L18 32 L22 36 L18 40 L22 44 L22 55 M38 5 L38 12 L42 16 L38 20 L42 24 L38 28 L42 32 L38 36 L42 40 L38 44 L38 55" fill="none" stroke="#607080" stroke-width="2"/></svg>
+                            <span>Compensator</span>
+                        </button>
+                    </div>
+
+                    <hr class="divider">
+
+                    <h3>Preset Installaties</h3>
+                    <div class="preset-list" id="preset-list">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <hr class="divider">
+
+                    <button id="btn-clear-all" class="btn btn-danger btn-large">
+                        <span class="icon">🗑️</span> Installatie wissen
+                    </button>
+                </div>
+
+                <!-- Center: 3D Viewport -->
+                <div class="viewport-panel">
+                    <div id="install-viewport" class="viewport-3d">
+                        <div class="viewport-overlay" id="install-overlay">
+                            <span>Voeg componenten toe of kies een preset installatie</span>
+                        </div>
+                    </div>
+                    <div class="viewport-controls">
+                        <span>🖱️ Roteren | Scrollwiel = Zoomen | Rechts = Pannen</span>
+                        <div class="viewport-tools">
+                            <label class="toggle-label">
+                                <input type="checkbox" id="install-show-dims">
+                                Afmetingen
+                            </label>
+                            <button class="btn-icon" id="btn-screenshot-install" title="Screenshot">📷</button>
+                        </div>
+                        <span id="component-count">0 componenten</span>
+                    </div>
+                </div>
+
+                <!-- Right: Component Properties + Stuklijst -->
+                <div class="side-panel properties-panel">
+                    <h2>Component Toevoegen</h2>
+                    <div id="add-component-form">
+                        <div class="form-group">
+                            <label>Buitendiameter (mm)</label>
+                            <input type="number" id="comp-diameter" value="219" min="10" max="2000" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Wanddikte (mm)</label>
+                            <input type="number" id="comp-wall" value="6" min="1" max="50" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Lengte (mm)</label>
+                            <input type="number" id="comp-length" value="500" min="50" max="5000" step="10">
+                        </div>
+                        <div class="form-group elbow-opt" style="display:none">
+                            <label>Buighoek (°)</label>
+                            <input type="number" id="comp-bend-angle" value="90" min="-180" max="180" step="5">
+                        </div>
+                        <div class="form-group elbow-opt" style="display:none">
+                            <label>Buigradius (mm)</label>
+                            <input type="number" id="comp-bend-radius" value="300" min="50" max="3000" step="10">
+                        </div>
+                        <div class="form-group elbow-opt" style="display:none">
+                            <label>Buigvlak</label>
+                            <select id="comp-bend-plane">
+                                <option value="vertical">Verticaal</option>
+                                <option value="horizontal">Horizontaal</option>
+                            </select>
+                        </div>
+                        <div class="form-group reducer-opt" style="display:none">
+                            <label>Eindiameter (mm)</label>
+                            <input type="number" id="comp-end-diameter" value="168" min="10" max="2000" step="1">
+                        </div>
+                        <div class="form-group valve-opt" style="display:none">
+                            <label>Klep type</label>
+                            <select id="comp-valve-type">
+                                <option value="kogelkraan">Kogelkraan</option>
+                                <option value="vlinderkraan">Vlinderkraan</option>
+                                <option value="schuifafsluiter">Schuifafsluiter</option>
+                                <option value="terugslagklep">Terugslagklep</option>
+                            </select>
+                        </div>
+                        <div class="form-group valve-opt" style="display:none">
+                            <label>Kleplengte (mm)</label>
+                            <input type="number" id="comp-valve-length" value="250" min="100" max="1000" step="10">
+                        </div>
+
+                        <button id="btn-add-component" class="btn btn-primary btn-large" disabled>
+                            <span class="icon">➕</span> Toevoegen
+                        </button>
+                    </div>
+
+                    <hr class="divider">
+
+                    <h2>Stuklijst (BOM)</h2>
+                    <div id="bom-list" class="bom-container">
+                        <p class="placeholder-text">Nog geen componenten toegevoegd.</p>
+                    </div>
+
+                    <hr class="divider">
+
+                    <button id="btn-to-scanner" class="btn btn-accent btn-large" disabled>
+                        <span class="icon">📡</span> Naar Scanner →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 1: Room Scanner -->
+        <section id="tab-scanner" class="tab-content">
+            <div class="panel-layout">
+                <div class="side-panel">
+                    <h2>3D Ruimte Scanner</h2>
+                    <p class="description">Simuleert een LiDAR 3D-scan van een industriële ruimte. De scanner detecteert automatisch de leidingcomponenten via AI-herkenning.</p>
+
+                    <div class="info-card" id="scanner-install-info">
+                        <p class="placeholder-text">Geen installatie geladen.</p>
+                    </div>
+
+                    <h3>Scan Configuratie</h3>
+                    <div class="form-group">
+                        <label>Scan resolutie</label>
+                        <select id="scan-resolution">
+                            <option value="low">Laag (sneller)</option>
+                            <option value="medium" selected>Normaal</option>
+                            <option value="high">Hoog (nauwkeurig)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="scan-show-room" checked>
+                        <label for="scan-show-room">Toon ruimte</label>
+                    </div>
+
+                    <button id="btn-start-scan" class="btn btn-primary btn-large" disabled>
+                        <span class="icon">▶</span> Start Ruimte Scan
+                    </button>
+
+                    <!-- Phase indicators -->
+                    <div id="scan-phases" class="scan-phases" style="display:none">
+                        <div class="scan-phase" id="phase-lidar">
+                            <div class="phase-indicator"></div>
+                            <div class="phase-info">
+                                <span class="phase-name">1. LiDAR Scan</span>
+                                <span class="phase-desc">Ruimte &amp; objecten scannen</span>
+                            </div>
+                            <span class="phase-status" id="phase-lidar-status">Wachten...</span>
+                        </div>
+                        <div class="scan-phase" id="phase-pointcloud">
+                            <div class="phase-indicator"></div>
+                            <div class="phase-info">
+                                <span class="phase-name">2. Puntenwolk</span>
+                                <span class="phase-desc">Puntenwolk opbouwen</span>
+                            </div>
+                            <span class="phase-status" id="phase-pointcloud-status">Wachten...</span>
+                        </div>
+                        <div class="scan-phase" id="phase-detect">
+                            <div class="phase-indicator"></div>
+                            <div class="phase-info">
+                                <span class="phase-name">3. AI Detectie</span>
+                                <span class="phase-desc">Leidingcomponenten herkennen</span>
+                            </div>
+                            <span class="phase-status" id="phase-detect-status">Wachten...</span>
+                        </div>
+                        <div class="scan-phase" id="phase-classify">
+                            <div class="phase-indicator"></div>
+                            <div class="phase-info">
+                                <span class="phase-name">4. Classificatie</span>
+                                <span class="phase-desc">Type, diameter &amp; geometrie bepalen</span>
+                            </div>
+                            <span class="phase-status" id="phase-classify-status">Wachten...</span>
+                        </div>
+                    </div>
+
+                    <div id="scan-progress" class="progress-container" style="display:none">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="scan-progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="scan-progress-text">Scannen... 0%</span>
+                    </div>
+
+                    <div id="scan-result" class="result-card" style="display:none">
+                        <h4>Scan &amp; Detectie Resultaat</h4>
+                        <div id="scan-result-details"></div>
+                        <button id="btn-use-scan" class="btn btn-success">
+                            Configureer Isolatie →
+                        </button>
+                    </div>
+                </div>
+
+                <div class="viewport-panel">
+                    <div id="scanner-viewport" class="viewport-3d">
+                        <div class="viewport-overlay" id="scanner-overlay">
+                            <span>Bouw eerst een installatie in de Installatie tab</span>
+                        </div>
+                    </div>
+                    <div class="viewport-controls">
+                        <span>🖱️ Roteren | Scrollwiel = Zoomen | Rechts = Pannen</span>
+                        <button class="btn-icon" id="btn-screenshot-scanner" title="Screenshot">📷</button>
+                        <span id="scan-live-status"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Configurator -->
+        <section id="tab-configurator" class="tab-content">
+            <div class="panel-layout">
+                <div class="side-panel">
+                    <h2>Isolatie Configurator</h2>
+                    <p class="description">Configureer isolatie voor alle componenten in de installatie.</p>
+
+                    <div class="info-card" id="pipe-info-card">
+                        <p class="placeholder-text">Geen installatie geladen.</p>
+                    </div>
+
+                    <h3>Isolatie Parameters</h3>
+
+                    <div class="form-group">
+                        <label>Isolatiemateriaal</label>
+                        <select id="insulation-material">
+                            <option value="mineral-wool">Minerale wol</option>
+                            <option value="glass-wool">Glaswol</option>
+                            <option value="foam">Schuim (PUR/PIR)</option>
+                            <option value="aerogel">Aerogel</option>
+                            <option value="calcium-silicate">Calciumsilicaat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Isolatiedikte (mm)</label>
+                        <input type="number" id="insulation-thickness" value="50" min="10" max="300" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label>Bekleding</label>
+                        <select id="cladding-type">
+                            <option value="aluminium">Aluminium</option>
+                            <option value="stainless">RVS</option>
+                            <option value="pvc">PVC</option>
+                            <option value="none">Geen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bekledingsdikte (mm)</label>
+                        <input type="number" id="cladding-thickness" value="0.7" min="0.3" max="2" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Overlap (mm)</label>
+                        <input type="number" id="overlap" value="30" min="0" max="100" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label>Segmenten per recht stuk</label>
+                        <input type="number" id="num-segments" value="2" min="1" max="8" step="1">
+                    </div>
+
+                    <button id="btn-apply-insulation" class="btn btn-primary btn-large">
+                        <span class="icon">🔄</span> Isolatie Toepassen
+                    </button>
+
+                    <div id="cost-calculator" class="info-card" style="display:none">
+                        <h4>💰 Materiaalberekening</h4>
+                        <div id="cost-details"></div>
+                    </div>
+
+                    <button id="btn-generate-uitslag" class="btn btn-accent btn-large">
+                        <span class="icon">📐</span> Genereer Alle Uitslagen →
+                    </button>
+                </div>
+
+                <div class="viewport-panel">
+                    <div id="configurator-viewport" class="viewport-3d">
+                        <div class="viewport-overlay" id="configurator-overlay">
+                            <span>Scan eerst de installatie</span>
+                        </div>
+                        <div id="thermal-legend" class="thermal-legend" style="display:none">
+                            <span class="legend-title">Temperatuurverloop</span>
+                            <div class="legend-bar"></div>
+                            <div class="legend-labels">
+                                <span>Heet</span>
+                                <span>Koud</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="viewport-controls">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="toggle-transparent" checked>
+                            Transparant
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="toggle-wireframe">
+                            Wireframe
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="toggle-thermal">
+                            Warmtekaart
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="toggle-dims-config">
+                            Afmetingen
+                        </label>
+                        <button class="btn-icon" id="btn-fly-through" title="Camera fly-through">🎥</button>
+                        <button class="btn-icon" id="btn-screenshot-config" title="Screenshot">📷</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Uitslag -->
+        <section id="tab-uitslag" class="tab-content">
+            <div class="panel-layout">
+                <div class="side-panel">
+                    <h2>Uitslagen (Cutting Patterns)</h2>
+                    <p class="description">Vlakke uitslagen voor alle componenten.</p>
+
+                    <div id="uitslag-info-card" class="info-card">
+                        <p class="placeholder-text">Geen uitslagen gegenereerd.</p>
+                    </div>
+
+                    <h3>Weergave Opties</h3>
+                    <div class="form-group">
+                        <label>Schaal</label>
+                        <select id="uitslag-scale">
+                            <option value="fit">Passend</option>
+                            <option value="1:1">1:1</option>
+                            <option value="1:2">1:2</option>
+                            <option value="1:5">1:5</option>
+                            <option value="1:10">1:10</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Eenheden</label>
+                        <select id="uitslag-units">
+                            <option value="mm">Millimeters</option>
+                            <option value="cm">Centimeters</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-fold-lines" checked>
+                        <label for="show-fold-lines">Vouwlijnen</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-dimensions" checked>
+                        <label for="show-dimensions">Maatvoering</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-overlap" checked>
+                        <label for="show-overlap">Overlap</label>
+                    </div>
+
+                    <h3>Nesting Opties</h3>
+                    <div class="form-group">
+                        <label>Plaatformaat</label>
+                        <select id="sheet-size">
+                            <option value="1000x2000">1000 × 2000 mm</option>
+                            <option value="1250x2500" selected>1250 × 2500 mm</option>
+                            <option value="1500x3000">1500 × 3000 mm</option>
+                            <option value="2000x4000">2000 × 4000 mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-nesting" checked>
+                        <label for="show-nesting">Nesting weergave</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-grid" checked>
+                        <label for="show-grid">Grid</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="show-cut-order" checked>
+                        <label for="show-cut-order">Snijvolgorde</label>
+                    </div>
+
+                    <div id="nesting-stats" class="info-card nesting-stats-card" style="display:none">
+                        <h4>📊 Nesting Resultaat</h4>
+                        <div id="nesting-stats-details"></div>
+                    </div>
+
+                    <h3>Component Filter</h3>
+                    <div id="uitslag-filter" class="filter-list">
+                        <p class="placeholder-text">Geen componenten</p>
+                    </div>
+
+                    <button id="btn-export-svg" class="btn btn-primary btn-large">
+                        <span class="icon">💾</span> Exporteer SVG
+                    </button>
+                    <button id="btn-export-dxf" class="btn btn-secondary btn-large">
+                        <span class="icon">📄</span> Exporteer DXF
+                    </button>
+                    <button id="btn-print" class="btn btn-secondary btn-large">
+                        <span class="icon">🖨️</span> Afdrukken
+                    </button>
+                </div>
+
+                <div class="viewport-panel">
+                    <div id="uitslag-viewport" class="uitslag-canvas-container">
+                        <canvas id="uitslag-canvas"></canvas>
+                        <div class="viewport-overlay" id="uitslag-overlay">
+                            <span>Genereer eerst uitslagen in de Isolatie tab</span>
+                        </div>
+                    </div>
+                    <div class="viewport-controls">
+                        <span>🖱️ Slepen = Pannen | Scrollwiel = Zoomen | Rechts = Pannen</span>
+                        <button class="btn-icon" id="btn-reset-uitslag-view" title="Reset weergave">🔄</button>
+                        <div id="uitslag-summary"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Thermatras - Installatie Scanner &amp; Isolatie Uitslag Tool (Mockup v4.0)</p>
+    </footer>
+
+    <script src="js/installation-builder.js"></script>
+    <script src="js/pipe-builder.js"></script>
+    <script src="js/uitslag-generator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
